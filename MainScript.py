@@ -21,7 +21,7 @@ except ImportError as e:
     print(f"Failed to import from PandaDatabaseFunctions: {e}")
 
 
-    
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("Search CSV", callback_data='search_csv')],
@@ -75,7 +75,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Please use the /start command to interact with the bot.")
 
 if __name__ == '__main__':
-    application = ApplicationBuilder().token('7890270186:AAE9k18DEqHK6g3G9e1i04Ce1xZuuQS0ahc').build()
+    application = ApplicationBuilder().token('**************').build()
     
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CallbackQueryHandler(button))
