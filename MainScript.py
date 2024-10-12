@@ -4,7 +4,10 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, Cal
 import pandas as pd
 from PandaDatabaseFunctions import *
 
-CSV_FILENAME = 'battles.csv'
+BattlesDatabase = 'battles.csv'
+CharactersDeathesDatabase = 'character-deaths.csv'
+CharactersPredictions = 'character-predictions.csv'
+
 # Include the pandas functions from the previous artifact here
 
 import os
@@ -21,7 +24,7 @@ except ImportError as e:
     print(f"Failed to import from PandaDatabaseFunctions: {e}")
 
 
-
+    
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("Search CSV", callback_data='search_csv')],
@@ -36,15 +39,15 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     if query.data == 'search_csv':
-        columns = get_column_names(CSV_FILENAME)
+        columns = get_column_names(BattlesDatabase)
         keyboard = [[InlineKeyboardButton(col, callback_data=f'search_{col}')] for col in columns]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_text("Select a column to search:", reply_markup=reply_markup)
     elif query.data == 'show_columns':
-        columns = get_column_names(CSV_FILENAME)
+        columns = get_column_names(BattlesDatabase)
         await query.edit_message_text(f"Columns in the CSV file:\n{', '.join(columns)}")
     elif query.data == 'show_unique':
-        columns = get_column_names(CSV_FILENAME)
+        columns = get_column_names(BattlesDatabase)
         keyboard = [[InlineKeyboardButton(col, callback_data=f'unique_{col}')] for col in columns]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_text("Select a column to show unique values:", reply_markup=reply_markup)
@@ -54,14 +57,14 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(f"Enter a value to search in the {column} column:")
     elif query.data.startswith('unique_'):
         column = query.data.split('_')[1]
-        unique_values = get_unique_values(CSV_FILENAME, column)
+        unique_values = get_unique_values(BattlesDatabase, column)
         await query.edit_message_text(f"Unique values in {column}:\n{', '.join(map(str, unique_values))}")
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if 'search_column' in context.user_data:
         column = context.user_data['search_column']
         value = update.message.text
-        results = search_csv(CSV_FILENAME, column, value)
+        results = search_csv(BattlesDatabase, column, value)
         if not results.empty:
             response = f"Found {len(results)} results:\n\n"
             response += results.to_string(index=False)
@@ -75,7 +78,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Please use the /start command to interact with the bot.")
 
 if __name__ == '__main__':
-    application = ApplicationBuilder().token('**************').build()
+    application = ApplicationBuilder().token('7890270186:AAE9k18DEqHK6g3G9e1i04Ce1xZuuQS0ahc').build()
     
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CallbackQueryHandler(button))
