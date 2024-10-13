@@ -27,9 +27,9 @@ except ImportError as e:
     
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        [InlineKeyboardButton("Search CSV", callback_data='search_csv')],
-        [InlineKeyboardButton("Show Columns", callback_data='show_columns')],
-        [InlineKeyboardButton("Show Unique Values", callback_data='show_unique')]
+        [InlineKeyboardButton("جستجوی تاریخچه جنگ‌ها", callback_data='Battles')],
+        [InlineKeyboardButton("جستجوی تاریخچه شخصیت‌ها", callback_data='Characters')],
+        [InlineKeyboardButton("جستجوی تاریخچه مرگ شخصیت‌ها", callback_data='Deaths')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text('Choose an action:', reply_markup=reply_markup)
@@ -37,10 +37,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-
-    if query.data == 'search_csv':
+    if query.data == 'Battles':
+        print(get_value_from_row_index(BattlesDatabase,2,0))
+        print(get_value_from_row_index(BattlesDatabase,3,0))
+        print(get_value_from_row_index(BattlesDatabase,4,0))
         columns = get_column_names(BattlesDatabase)
-        keyboard = [[InlineKeyboardButton(col, callback_data=f'search_{col}')] for col in columns]
+        keyboard = [[InlineKeyboardButton(col, callback_data=col)] for col in get_value_from_row_index(BattlesDatabase)]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_text("Select a column to search:", reply_markup=reply_markup)
     elif query.data == 'show_columns':
@@ -78,7 +80,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Please use the /start command to interact with the bot.")
 
 if __name__ == '__main__':
-    application = ApplicationBuilder().token('7890270186:AAE9k18DEqHK6g3G9e1i04Ce1xZuuQS0ahc').build()
+    application = ApplicationBuilder().token('**********').build()
     
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CallbackQueryHandler(button))
