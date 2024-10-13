@@ -38,4 +38,13 @@ def get_value_from_row_index(file_path, row_index=1, column_index=1):
         raise ValueError(f"Column index {column_index} is out of bounds. The CSV file has {len(df.columns)} columns.")
     
     return df.iloc[row_index, column_index]
+
+def get_battles_names(filename):
+    df = pd.read_csv(filename)
+    battle_names = []
+    for i in range(0,len(df)):
+        battle_names.append(df.iloc[i,0])
+    return battle_names
+
+
     

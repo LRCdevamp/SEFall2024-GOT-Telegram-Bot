@@ -32,19 +32,27 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("جستجوی تاریخچه مرگ شخصیت‌ها", callback_data='Deaths')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text('Choose an action:', reply_markup=reply_markup)
+    await update.message.reply_text('درمورد چی برات بگم؟', reply_markup=reply_markup)
+
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    if query.data == 'Battles':
-        print(get_value_from_row_index(BattlesDatabase,2,0))
-        print(get_value_from_row_index(BattlesDatabase,3,0))
-        print(get_value_from_row_index(BattlesDatabase,4,0))
-        columns = get_column_names(BattlesDatabase)
-        keyboard = [[InlineKeyboardButton(col, callback_data=col)] for col in get_value_from_row_index(BattlesDatabase)]
+
+    if query.data == 'BackToMainMenu':
+        keyboard = [[InlineKeyboardButton("جستجوی تاریخچه جنگ‌ها", callback_data='Battles')],
+                    [InlineKeyboardButton("جستجوی تاریخچه شخصیت‌ها", callback_data='Characters')],
+                    [InlineKeyboardButton("جستجوی تاریخچه مرگ شخصیت‌ها", callback_data='Deaths')]]   
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.edit_message_text("Select a column to search:", reply_markup=reply_markup)
+        await query.edit_message_text("خب برگشتم! حالا درمورد چی برات بگم؟", reply_markup=reply_markup)
+
+    elif query.data == 'Battles':
+        battle_names = get_battles_names(BattlesDatabase)
+        keyboard = [[InlineKeyboardButton(col, callback_data=col)] for col in battle_names]
+        keyboard.append([InlineKeyboardButton('بازگشت به منو اصلی',callback_data='BackToMainMenu')])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text("در مورد کدوم جنگ میخوای بیشتر بدونی؟", reply_markup=reply_markup)
+
     elif query.data == 'show_columns':
         columns = get_column_names(BattlesDatabase)
         await query.edit_message_text(f"Columns in the CSV file:\n{', '.join(columns)}")
@@ -80,7 +88,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Please use the /start command to interact with the bot.")
 
 if __name__ == '__main__':
-    application = ApplicationBuilder().token('**********').build()
+    application = ApplicationBuilder().token('****************').build()
     
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CallbackQueryHandler(button))
