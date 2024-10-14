@@ -54,12 +54,10 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("در مورد کدوم جنگ میخوای بیشتر بدونی؟", reply_markup=reply_markup)
 
     elif query.data in get_battles_names(BattlesDatabase):
-        get_battles_names(BattlesDatabase)
-        keyboard = [[InlineKeyboardButton('بازگشت به منو اصلی',callback_data='BackToMainMenu')],
-                    [InlineKeyboardButton("جنگ بعدی", callback_data='NextBattle')],
-                    [InlineKeyboardButton("بازگشت به لیست جنگ‌ها", callback_data='Battles')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
         battle_Index = battle_names.index(query.data)
+        keyboard = [[InlineKeyboardButton('بازگشت به منو اصلی',callback_data='BackToMainMenu')],
+                    [InlineKeyboardButton("جنگ بعدی",callback_data='{battleName}'.format(battleName=battle_names[battle_Index+1] if battle_Index != 37 else battle_names[0]))],                    [InlineKeyboardButton("بازگشت به لیست جنگ‌ها", callback_data='Battles')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
         entry = get_entry(BattlesDatabase,battle_Index)
         await query.edit_message_text("نام جنگ: {name}\nسال وقوع جنگ: {year}\nپادشاه حمله‌کننده: {attacker_king}\nپادشاه مدافع: {defender_king}".format(name=query.data,year=entry.year,attacker_king = entry.attacker_king,defender_king = entry.defender_king),reply_markup=reply_markup)
 
@@ -81,7 +79,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Please use the /start command to interact with the bot.")
 
 if __name__ == '__main__':
-    application = ApplicationBuilder().token('**********************').build()
+    application = ApplicationBuilder().token('*********************').build()
     
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CallbackQueryHandler(button))
