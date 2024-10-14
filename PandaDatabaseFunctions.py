@@ -40,10 +40,22 @@ def get_entry(filename,index):
     return df.iloc[index]
     
 
-def get_characters_name(word,filename):
+def get_characters_name(filename,word):
     df = pd.read_csv(filename)
     names = []
+    pagedNames = []
+    page = []
     for i in range(0,len(df)):
-        if df.iloc[i,6].index(0) == word:
-            names.append(df.iloc[i,6])
-    return names
+        if df.iloc[i,5][0] == word:
+            names.append(df.iloc[i,5])
+
+    print(len(names))
+
+    for i in range(0,len(names)):
+        if 0 <= i and i < 90:
+            pagedNames[0].append(names[i])
+        elif 90 <= i and i < 180:
+            pagedNames[1].append(names[i])
+
+    return pagedNames
+   

@@ -61,6 +61,15 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_text("از اونجایی که دو هزار تا کارکتر داریم، حرف اول کارکترت رو انتخاب کن", reply_markup=reply_markup)
 
+    elif query.data in string.ascii_uppercase:
+
+        keyboard = [[InlineKeyboardButton(name,callback_data=name)] for name in get_characters_name(CharactersPredictions,query.data)[1]]
+        keyboard.append([InlineKeyboardButton("حرف بعدی", callback_data='NextCharacter')])
+        keyboard.append([InlineKeyboardButton("بازگشت به لیست حروف", callback_data='Characters')])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text("IS IT WORKING?",reply_markup=reply_markup)
+
+
 
     elif query.data in get_battles_names(BattlesDatabase):
         get_battles_names(BattlesDatabase)
@@ -142,8 +151,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Please use the /start command to interact with the bot.")
 
 if __name__ == '__main__':
-    application = ApplicationBuilder().token('7890270186:AAFzK49GuzNLKcGyiYunxkS1InhGCELeJds').build()
-    application = ApplicationBuilder().token('**********************').build()
+    application = ApplicationBuilder().token('*************************').build()
     
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CallbackQueryHandler(button))
