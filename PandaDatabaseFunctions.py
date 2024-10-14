@@ -39,3 +39,11 @@ def get_entry(filename,index):
     df = pd.read_csv(filename)
     return df.iloc[index]
     
+
+def get_characters_name(word,filename):
+    df = pd.read_csv(filename)
+    names = []
+    for i in range(0,len(df)):
+        if df.iloc[i,6].index(0) == word:
+            names.append(df.iloc[i,6])
+    return names
