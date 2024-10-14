@@ -19,6 +19,23 @@ def get_column_names(filename):
     df = read_csv(filename)
     return df.columns.tolist()
 
+def get_column_value(file_path, column_name):
+    df = pd.read_csv(file_path)
+    return df[column_name].tolist()
+
+
 def get_unique_values(filename, column):
     df = read_csv(filename)
     return df[column].unique().tolist()
+
+def get_battles_names(filename):
+    df = pd.read_csv(filename)
+    battle_names = []
+    for i in range(0,len(df)):
+        battle_names.append(df.iloc[i,0])
+    return battle_names
+
+def get_entry(filename,index):
+    df = pd.read_csv(filename)
+    return df.iloc[index]
+    

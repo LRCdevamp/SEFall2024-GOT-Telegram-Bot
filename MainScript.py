@@ -7,7 +7,8 @@ from PandaDatabaseFunctions import *
 BattlesDatabase = 'battles.csv'
 CharactersDeathesDatabase = 'character-deaths.csv'
 CharactersPredictions = 'character-predictions.csv'
-
+global battle_names
+battle_names =  get_battles_names(BattlesDatabase)
 # Include the pandas functions from the previous artifact here
 
 import os
@@ -27,38 +28,40 @@ except ImportError as e:
     
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        [InlineKeyboardButton("Search CSV", callback_data='search_csv')],
-        [InlineKeyboardButton("Show Columns", callback_data='show_columns')],
-        [InlineKeyboardButton("Show Unique Values", callback_data='show_unique')]
+        [InlineKeyboardButton("جستجوی تاریخچه جنگ‌ها", callback_data='Battles')],
+        [InlineKeyboardButton("جستجوی تاریخچه شخصیت‌ها", callback_data='Characters')],
+        [InlineKeyboardButton("جستجوی تاریخچه مرگ شخصیت‌ها", callback_data='Deaths')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text('Choose an action:', reply_markup=reply_markup)
+    await update.message.reply_text('درمورد چی برات بگم؟', reply_markup=reply_markup)
+    
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    if query.data == 'search_csv':
-        columns = get_column_names(BattlesDatabase)
-        keyboard = [[InlineKeyboardButton(col, callback_data=f'search_{col}')] for col in columns]
+    if query.data == 'BackToMainMenu':
+        keyboard = [[InlineKeyboardButton("جستجوی تاریخچه جنگ‌ها", callback_data='Battles')],
+                    [InlineKeyboardButton("جستجوی تاریخچه شخصیت‌ها", callback_data='Characters')],
+                    [InlineKeyboardButton("جستجوی تاریخچه مرگ شخصیت‌ها", callback_data='Deaths')]]   
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.edit_message_text("Select a column to search:", reply_markup=reply_markup)
-    elif query.data == 'show_columns':
-        columns = get_column_names(BattlesDatabase)
-        await query.edit_message_text(f"Columns in the CSV file:\n{', '.join(columns)}")
-    elif query.data == 'show_unique':
-        columns = get_column_names(BattlesDatabase)
-        keyboard = [[InlineKeyboardButton(col, callback_data=f'unique_{col}')] for col in columns]
+        await query.edit_message_text("خب برگشتم! حالا درمورد چی برات بگم؟", reply_markup=reply_markup)
+
+    elif query.data == 'Battles':
+        keyboard = [[InlineKeyboardButton(col, callback_data=col)] for col in get_battles_names(BattlesDatabase)]
+        keyboard.append([InlineKeyboardButton('بازگشت به منو اصلی',callback_data='BackToMainMenu')])
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.edit_message_text("Select a column to show unique values:", reply_markup=reply_markup)
-    elif query.data.startswith('search_'):
-        column = query.data.split('_')[1]
-        context.user_data['search_column'] = column
-        await query.edit_message_text(f"Enter a value to search in the {column} column:")
-    elif query.data.startswith('unique_'):
-        column = query.data.split('_')[1]
-        unique_values = get_unique_values(BattlesDatabase, column)
-        await query.edit_message_text(f"Unique values in {column}:\n{', '.join(map(str, unique_values))}")
+        await query.edit_message_text("در مورد کدوم جنگ میخوای بیشتر بدونی؟", reply_markup=reply_markup)
+
+    elif query.data in get_battles_names(BattlesDatabase):
+        get_battles_names(BattlesDatabase)
+        keyboard = [[InlineKeyboardButton('بازگشت به منو اصلی',callback_data='BackToMainMenu')],
+                    [InlineKeyboardButton("جنگ بعدی", callback_data='NextBattle')],
+                    [InlineKeyboardButton("بازگشت به لیست جنگ‌ها", callback_data='Battles')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        battle_Index = battle_names.index(query.data)
+        entry = get_entry(BattlesDatabase,battle_Index)
+        await query.edit_message_text("نام جنگ: {name}\nسال وقوع جنگ: {year}\nپادشاه حمله‌کننده: {attacker_king}\nپادشاه مدافع: {defender_king}".format(name=query.data,year=entry.year,attacker_king = entry.attacker_king,defender_king = entry.defender_king),reply_markup=reply_markup)
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if 'search_column' in context.user_data:
@@ -78,7 +81,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Please use the /start command to interact with the bot.")
 
 if __name__ == '__main__':
-    application = ApplicationBuilder().token('7890270186:AAE9k18DEqHK6g3G9e1i04Ce1xZuuQS0ahc').build()
+    application = ApplicationBuilder().token('**********************').build()
     
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CallbackQueryHandler(button))
