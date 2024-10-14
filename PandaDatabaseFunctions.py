@@ -28,17 +28,6 @@ def get_unique_values(filename, column):
     df = read_csv(filename)
     return df[column].unique().tolist()
 
-def get_value_from_row_index(file_path, row_index=1, column_index=1):
-    df = pd.read_csv(file_path)    
-
-    if row_index >= len(df):
-        raise ValueError(f"Row index {row_index} is out of bounds. The CSV file has {len(df)} rows.")
-    
-    if column_index >= len(df.columns):
-        raise ValueError(f"Column index {column_index} is out of bounds. The CSV file has {len(df.columns)} columns.")
-    
-    return df.iloc[row_index, column_index]
-
 def get_battles_names(filename):
     df = pd.read_csv(filename)
     battle_names = []
@@ -46,5 +35,7 @@ def get_battles_names(filename):
         battle_names.append(df.iloc[i,0])
     return battle_names
 
-
+def get_entry(filename,index):
+    df = pd.read_csv(filename)
+    return df.iloc[index]
     
