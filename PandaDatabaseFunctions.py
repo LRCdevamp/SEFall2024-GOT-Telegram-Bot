@@ -69,10 +69,33 @@ def get_characters_names_length(filename,word):
             names.append(df.iloc[i,5])
     return len(names)
    
+def get_characters_deaths_length(filename,word):
+    df = pd.read_csv(filename)
+    names = []
+    for i in range(0,len(df)):
+        if df.iloc[i,0][0] == word:
+            names.append(df.iloc[i,0])
+    return len(names)
 
-def get_names(filename):
+
+def get_names_from_characters(filename):
     df = pd.read_csv(filename)
     names = []
     for i in range(0,len(df)):
         names.append(df.iloc[i,5])
     return names
+
+def get_all_names_from_deaths(filename):
+    df = pd.read_csv(filename)
+    names = []
+    for i in range(0,len(df)):
+        names.append(df.iloc[i,0])
+    return names
+
+def get_names_from_deaths(filename,word):
+    df = pd.read_csv(filename)
+    names = []
+    for i in range(0,len(df)):
+        if df.iloc[i,0][0] == word:
+            names.append(df.iloc[i,0])
+    return split_list(names,20)

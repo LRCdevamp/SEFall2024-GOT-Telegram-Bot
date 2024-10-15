@@ -71,12 +71,12 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_text(f"مجموعا {get_characters_names_length(CharactersPredictions,letter)} تا اسم داریم که با این حرف شروع میشن.\n این صفحه {int(number)+1} از {len(get_characters_name(CharactersPredictions,letter))}صفحه‌ست!",reply_markup=reply_markup)
 
-    elif query.data in get_names(CharactersPredictions):
+    elif query.data in get_names_from_characters(CharactersPredictions):
         keyboard = [[InlineKeyboardButton('بازگشت به منو اصلی',callback_data='BackToMainMenu')],
                     [InlineKeyboardButton(f"بازگشت به لیست کارکترهای حرف {query.data[0]}", callback_data=(f'{query.data[0]},0'))]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        character_Index = get_names(CharactersPredictions).index(query.data)
+        character_Index = get_names_from_characters(CharactersPredictions).index(query.data)
         entry = get_entry(CharactersPredictions,character_Index)
 
         await query.edit_message_text(
@@ -113,10 +113,11 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ,reply_markup=reply_markup)
 
     elif query.data in get_battles_names(BattlesDatabase):
-        battle_Index = battle_names.index(query.data)
         keyboard = [[InlineKeyboardButton('بازگشت به منو اصلی',callback_data='BackToMainMenu')],
-                    [InlineKeyboardButton("جنگ بعدی",callback_data='{battleName}'.format(battleName=battle_names[battle_Index+1] if battle_Index != 37 else battle_names[0]))],                    [InlineKeyboardButton("بازگشت به لیست جنگ‌ها", callback_data='Battles')]]
+                    [InlineKeyboardButton("جنگ بعدی", callback_data='NextBattle')],
+                    [InlineKeyboardButton("بازگشت به لیست جنگ‌ها", callback_data='Battles')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
+        battle_Index = battle_names.index(query.data)
         entry = get_entry(BattlesDatabase,battle_Index)
         await query.edit_message_text(
                     "نام جنگ: {name}\n"
@@ -166,6 +167,63 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         location=entry.location,
                         region=entry.region),reply_markup=reply_markup)
 
+    elif query.data == 'Deaths':
+        keyboard = [[InlineKeyboardButton(word, callback_data=f'death,{word},0')] for word in string.ascii_uppercase]
+        keyboard.append([InlineKeyboardButton('بازگشت به منو اصلی',callback_data='BackToMainMenu')])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text("دقیقا 917 تا مرگ تو کتاب‌ها ثبت شده. برای اینکه راحت‌تر بتونی شخصیت مورد نظرت رو پیدا کنی، حرف اول اسمش رو انتخاب کن.", reply_markup=reply_markup)
+
+    elif re.match(r'^death,[A-Z],[0-9]$',query.data):
+        death, letter, number = query.data.split(',')
+        keyboard = [[InlineKeyboardButton(name,callback_data=f'{name},death')] for name in get_names_from_deaths(CharactersDeathesDatabase,letter)[int(number)]]
+        keyboard.append([InlineKeyboardButton("صفحه بعدی", callback_data=(f'death,{letter},{int(number)+1}')if int(number)!=(len(get_names_from_deaths(CharactersDeathesDatabase,letter))-1) else (f'death,{letter},{0}'))])
+        keyboard.append([InlineKeyboardButton("صفحه قبلی", callback_data=(f'death,{letter},{int(number)-1}')if int(number)!= 0 else (f'death,{letter},{len(get_names_from_deaths(CharactersDeathesDatabase,letter))-1}'))])
+        keyboard.append([InlineKeyboardButton("بازگشت به لیست حروف", callback_data='Deaths')])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(f"مجموعا {get_characters_deaths_length(CharactersDeathesDatabase,letter)} تا اسم داریم که با این حرف شروع میشن.\n این صفحه {int(number)+1} از {len(get_names_from_deaths(CharactersDeathesDatabase,letter))}صفحه‌ست!",reply_markup=reply_markup)
+
+    elif re.match(r',death$',query.data):
+        keyboard = [[InlineKeyboardButton('بازگشت به منو اصلی',callback_data='BackToMainMenu')],
+                    [InlineKeyboardButton(f"بازگشت به لیست کارکترهای حرف {query.data[0]}", callback_data=(f'{query.data[0]},0'))]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+    
+        character_Index = get_names_from_characters(CharactersPredictions).index(query.data)
+        entry = get_entry(CharactersPredictions,character_Index)
+
+        await query.edit_message_text(
+            "نام شخصیت: {name}\n"
+            "لقب شخصیت: {title}\n"
+            "جنسیت شخصیت: {male}\n"
+            "خواستگاه فرهنگی شخصیت: {culture}\n"
+            "سال تولد: {dateOfBirth}\n"
+            "سال مرگ: {dateOfDeath}\n"
+            "نام پدر: {father}\n"
+            "نام مادر: {mother}\n"
+            "جانشین: {heir}\n"
+            "خاندان : {house}\n"
+            "نام همسر: {spouse}\n"
+            "آیا فرد از خانواده اشرافی است؟ {isNoble}\n"
+            "آیا فرد ازدواج کرده است؟ {isMarried}\n"
+            "سن: {age}\n"
+            "آیا شخصیت تا انتهای آخرین کتاب، زنده است؟ {isAlive}\n".format(
+                name = query.data,
+                title={entry.title} if entry.title != 'none' else 'ندارد',
+                male = "مرد" if entry.male == 1 else 'زن',
+                culture = entry.culture if entry.culture != 'none' else 'نامشخص',
+                dateOfBirth = entry.dateOfBirth if entry.dateOfBirth != 'none' else 'نامشخص',
+                dateOfDeath = entry.DateoFdeath if entry.DateoFdeath != 'none' else 'نامشخص',
+                father = entry.father if entry.father != 'none' else 'نامشخص',
+                mother = entry.mother if entry.mother != 'none' else 'نامشخص',
+                heir = entry.heir if entry.heir!= 'none' else 'ندارد',
+                house = entry.house if entry.house != 'none' else 'نامشخص',
+                spouse = entry.spouse if entry.spouse != 'none' else 'ندارد',
+                isNoble = 'بله' if entry.isNoble == 1 else 'خیر',
+                isMarried = 'بله' if entry.isMarried == 1 else 'خیر',
+                age = entry.age if entry.age != 'none' else 'نامشخص',
+                isAlive = 'بله' if entry.isAlive == 1 else 'خیر')
+            ,reply_markup=reply_markup)
+
+
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if 'search_column' in context.user_data:
@@ -185,7 +243,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Please use the /start command to interact with the bot.")
 
 if __name__ == '__main__':
-    application = ApplicationBuilder().token('************************').build()
+    application = ApplicationBuilder().token('7890270186:AAFzK49GuzNLKcGyiYunxkS1InhGCELeJds').build()
     
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CallbackQueryHandler(button))
