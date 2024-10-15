@@ -71,6 +71,12 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_text(f"مجموعا {get_characters_names_length(CharactersPredictions,letter)} تا اسم داریم که با این حرف شروع میشن.\n این صفحه {int(number)+1} از {len(get_characters_name(CharactersPredictions,letter))}صفحه‌ست!",reply_markup=reply_markup)
 
+    elif query.data in get_names(CharactersPredictions):
+        keyboard = [[InlineKeyboardButton('بازگشت به منو اصلی',callback_data='BackToMainMenu')],
+                    [InlineKeyboardButton(f"بازگشت به لیست کارکترهای حرف {query.data[0]}", callback_data=(f'{query.data[0]},0'))]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text("اطلاعات مربوط به کارکتر اینجا نوشته میشن",reply_markup=reply_markup)
+
     elif query.data in get_battles_names(BattlesDatabase):
         get_battles_names(BattlesDatabase)
         keyboard = [[InlineKeyboardButton('بازگشت به منو اصلی',callback_data='BackToMainMenu')],
@@ -146,7 +152,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Please use the /start command to interact with the bot.")
 
 if __name__ == '__main__':
-    application = ApplicationBuilder().token('**************************').build()
+    application = ApplicationBuilder().token('*****************************').build()
     
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CallbackQueryHandler(button))

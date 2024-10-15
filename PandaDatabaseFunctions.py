@@ -69,3 +69,10 @@ def get_characters_names_length(filename,word):
             names.append(df.iloc[i,5])
     return len(names)
    
+
+def get_names(filename):
+    df = pd.read_csv(filename)
+    names = []
+    for i in range(0,len(df)):
+        names.append(df.iloc[i,5])
+    return names
