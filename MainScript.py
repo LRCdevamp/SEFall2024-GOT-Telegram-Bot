@@ -1,4 +1,6 @@
 import logging
+import re
+import string
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
 import pandas as pd
@@ -52,6 +54,63 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard.append([InlineKeyboardButton('بازگشت به منو اصلی',callback_data='BackToMainMenu')])
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_text("در مورد کدوم جنگ میخوای بیشتر بدونی؟", reply_markup=reply_markup)
+
+
+    elif query.data == 'Characters':
+        keyboard = [[InlineKeyboardButton(word, callback_data=f'{word},0')] for word in string.ascii_uppercase]
+        keyboard.append([InlineKeyboardButton('بازگشت به منو اصلی',callback_data='BackToMainMenu')])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text("از اونجایی که دو هزار تا کارکتر داریم، حرف اول کارکترت رو انتخاب کن", reply_markup=reply_markup)
+
+    elif re.match(r'^[A-Z],[0-9]$', query.data):
+        letter, number = query.data.split(',')
+        keyboard = [[InlineKeyboardButton(name,callback_data=name)] for name in get_characters_name(CharactersPredictions,letter)[int(number)]]
+        keyboard.append([InlineKeyboardButton("صفحه بعدی", callback_data=(f'{letter},{int(number)+1}')if int(number)!=(len(get_characters_name(CharactersPredictions,letter))-1) else (f'{letter},{0}'))])
+        keyboard.append([InlineKeyboardButton("صفحه قبلی", callback_data=(f'{letter},{int(number)-1}')if int(number)!= 0 else (f'{letter},{len(get_characters_name(CharactersPredictions,letter))-1}'))])
+        keyboard.append([InlineKeyboardButton("بازگشت به لیست حروف", callback_data='Characters')])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(f"مجموعا {get_characters_names_length(CharactersPredictions,letter)} تا اسم داریم که با این حرف شروع میشن.\n این صفحه {int(number)+1} از {len(get_characters_name(CharactersPredictions,letter))}صفحه‌ست!",reply_markup=reply_markup)
+
+    elif query.data in get_names(CharactersPredictions):
+        keyboard = [[InlineKeyboardButton('بازگشت به منو اصلی',callback_data='BackToMainMenu')],
+                    [InlineKeyboardButton(f"بازگشت به لیست کارکترهای حرف {query.data[0]}", callback_data=(f'{query.data[0]},0'))]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        character_Index = get_names(CharactersPredictions).index(query.data)
+        entry = get_entry(CharactersPredictions,character_Index)
+
+        await query.edit_message_text(
+            "نام شخصیت: {name}\n"
+            "لقب شخصیت: {title}\n"
+            "جنسیت شخصیت: {male}\n"
+            "خواستگاه فرهنگی شخصیت: {culture}\n"
+            "سال تولد: {dateOfBirth}\n"
+            "سال مرگ: {dateOfDeath}\n"
+            "نام پدر: {father}\n"
+            "نام مادر: {mother}\n"
+            "جانشین: {heir}\n"
+            "خاندان : {house}\n"
+            "نام همسر: {spouse}\n"
+            "آیا فرد از خانواده اشرافی است؟ {isNoble}\n"
+            "آیا فرد ازدواج کرده است؟ {isMarried}\n"
+            "سن: {age}\n"
+            "آیا شخصیت تا انتهای آخرین کتاب، زنده است؟ {isAlive}\n".format(
+                name = query.data,
+                title={entry.title} if entry.title != 'none' else 'ندارد',
+                male = "مرد" if entry.male == 1 else 'زن',
+                culture = entry.culture if entry.culture != 'none' else 'نامشخص',
+                dateOfBirth = entry.dateOfBirth if entry.dateOfBirth != 'none' else 'نامشخص',
+                dateOfDeath = entry.DateoFdeath if entry.DateoFdeath != 'none' else 'نامشخص',
+                father = entry.father if entry.father != 'none' else 'نامشخص',
+                mother = entry.mother if entry.mother != 'none' else 'نامشخص',
+                heir = entry.heir if entry.heir!= 'none' else 'ندارد',
+                house = entry.house if entry.house != 'none' else 'نامشخص',
+                spouse = entry.spouse if entry.spouse != 'none' else 'ندارد',
+                isNoble = 'بله' if entry.isNoble == 1 else 'خیر',
+                isMarried = 'بله' if entry.isMarried == 1 else 'خیر',
+                age = entry.age if entry.age != 'none' else 'نامشخص',
+                isAlive = 'بله' if entry.isAlive == 1 else 'خیر')
+            ,reply_markup=reply_markup)
 
     elif query.data in get_battles_names(BattlesDatabase):
         battle_Index = battle_names.index(query.data)

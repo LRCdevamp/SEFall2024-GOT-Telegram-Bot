@@ -39,3 +39,40 @@ def get_entry(filename,index):
     df = pd.read_csv(filename)
     return df.iloc[index]
     
+
+def get_characters_name(filename,word):
+    df = pd.read_csv(filename)
+    names = []
+    for i in range(0,len(df)):
+        if df.iloc[i,5][0] == word:
+            names.append(df.iloc[i,5])
+    return split_list(names,20)
+
+
+def split_list(input_list, max_length):
+    if not input_list:
+        return []
+    
+    result = []
+    for i in range(0, len(input_list), max_length):
+        if i + max_length < len(input_list):
+            result.append(input_list[i:i + max_length])
+        else:
+            result.append(input_list[i:])
+    return result
+
+def get_characters_names_length(filename,word):
+    df = pd.read_csv(filename)
+    names = []
+    for i in range(0,len(df)):
+        if df.iloc[i,5][0] == word:
+            names.append(df.iloc[i,5])
+    return len(names)
+   
+
+def get_names(filename):
+    df = pd.read_csv(filename)
+    names = []
+    for i in range(0,len(df)):
+        names.append(df.iloc[i,5])
+    return names
