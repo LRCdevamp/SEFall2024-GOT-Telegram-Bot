@@ -1,4 +1,5 @@
 import logging
+import re
 import string
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
@@ -56,20 +57,18 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
     elif query.data == 'Characters':
-        keyboard = [[InlineKeyboardButton(word, callback_data=word)] for word in string.ascii_uppercase]
+        keyboard = [[InlineKeyboardButton(word, callback_data=f'{word},0')] for word in string.ascii_uppercase]
         keyboard.append([InlineKeyboardButton('بازگشت به منو اصلی',callback_data='BackToMainMenu')])
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_text("از اونجایی که دو هزار تا کارکتر داریم، حرف اول کارکترت رو انتخاب کن", reply_markup=reply_markup)
 
-    elif query.data in string.ascii_uppercase:
-
-        keyboard = [[InlineKeyboardButton(name,callback_data=name)] for name in get_characters_name(CharactersPredictions,query.data)[1]]
-        keyboard.append([InlineKeyboardButton("حرف بعدی", callback_data='NextCharacter')])
+    elif re.match(r'^[A-Z],[0-9]$', query.data):
+        letter, number = query.data.split(',')
+        keyboard = [[InlineKeyboardButton(name,callback_data=name)] for name in get_characters_name(CharactersPredictions,letter)[int(number)]]
+        keyboard.append([InlineKeyboardButton("صفحه بعدی", callback_data=f'{letter},{int(number)+1}')])
         keyboard.append([InlineKeyboardButton("بازگشت به لیست حروف", callback_data='Characters')])
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.edit_message_text("IS IT WORKING?",reply_markup=reply_markup)
-
-
+        await query.edit_message_text(f"مجموعا {get_characters_names_length(CharactersPredictions,letter)} تا اسم داریم که با این حرف شروع میشن.\n این صفحه {int(number)+1} از {len(get_characters_name(CharactersPredictions,letter))}صفحه‌ست!",reply_markup=reply_markup)
 
     elif query.data in get_battles_names(BattlesDatabase):
         get_battles_names(BattlesDatabase)
@@ -127,11 +126,6 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         location=entry.location,
                         region=entry.region),reply_markup=reply_markup)
 
-
-
-
-
-        await query.edit_message_text("نام جنگ: {name}\nسال وقوع جنگ: {year}\nپادشاه حمله‌کننده: {attacker_king}\nپادشاه مدافع: {defender_king}".format(name=query.data,year=entry.year,attacker_king = entry.attacker_king,defender_king = entry.defender_king),reply_markup=reply_markup)
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if 'search_column' in context.user_data:
