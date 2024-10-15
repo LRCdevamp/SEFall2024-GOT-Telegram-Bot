@@ -75,7 +75,42 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard = [[InlineKeyboardButton('بازگشت به منو اصلی',callback_data='BackToMainMenu')],
                     [InlineKeyboardButton(f"بازگشت به لیست کارکترهای حرف {query.data[0]}", callback_data=(f'{query.data[0]},0'))]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.edit_message_text("اطلاعات مربوط به کارکتر اینجا نوشته میشن",reply_markup=reply_markup)
+        
+        character_Index = get_names(CharactersPredictions).index(query.data)
+        entry = get_entry(CharactersPredictions,character_Index)
+
+        await query.edit_message_text(
+            "نام شخصیت: {name}\n"
+            "لقب شخصیت: {title}\n"
+            "جنسیت شخصیت: {male}\n"
+            "خواستگاه فرهنگی شخصیت: {culture}\n"
+            "سال تولد: {dateOfBirth}\n"
+            "سال مرگ: {dateOfDeath}\n"
+            "نام پدر: {father}\n"
+            "نام مادر: {mother}\n"
+            "جانشین: {heir}\n"
+            "خاندان : {house}\n"
+            "نام همسر: {spouse}\n"
+            "آیا فرد از خانواده اشرافی است؟ {isNoble}\n"
+            "آیا فرد ازدواج کرده است؟ {isMarried}\n"
+            "سن: {age}\n"
+            "آیا شخصیت تا انتهای آخرین کتاب، زنده است؟ {isAlive}\n".format(
+                name = query.data,
+                title={entry.title} if entry.title != 'none' else 'ندارد',
+                male = "مرد" if entry.male == 1 else 'زن',
+                culture = entry.culture if entry.culture != 'none' else 'نامشخص',
+                dateOfBirth = entry.dateOfBirth if entry.dateOfBirth != 'none' else 'نامشخص',
+                dateOfDeath = entry.DateoFdeath if entry.DateoFdeath != 'none' else 'نامشخص',
+                father = entry.father if entry.father != 'none' else 'نامشخص',
+                mother = entry.mother if entry.mother != 'none' else 'نامشخص',
+                heir = entry.heir if entry.heir!= 'none' else 'ندارد',
+                house = entry.house if entry.house != 'none' else 'نامشخص',
+                spouse = entry.spouse if entry.spouse != 'none' else 'ندارد',
+                isNoble = 'بله' if entry.isNoble == 1 else 'خیر',
+                isMarried = 'بله' if entry.isMarried == 1 else 'خیر',
+                age = entry.age if entry.age != 'none' else 'نامشخص',
+                isAlive = 'بله' if entry.isAlive == 1 else 'خیر')
+            ,reply_markup=reply_markup)
 
     elif query.data in get_battles_names(BattlesDatabase):
         get_battles_names(BattlesDatabase)
@@ -152,7 +187,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Please use the /start command to interact with the bot.")
 
 if __name__ == '__main__':
-    application = ApplicationBuilder().token('*****************************').build()
+    application = ApplicationBuilder().token('************************').build()
     
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CallbackQueryHandler(button))
