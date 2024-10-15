@@ -46,7 +46,7 @@ def get_characters_name(filename,word):
     for i in range(0,len(df)):
         if df.iloc[i,5][0] == word:
             names.append(df.iloc[i,5])
-    return split_list(names,50)
+    return split_list(names,20)
 
 
 def split_list(input_list, max_length):
