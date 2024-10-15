@@ -96,7 +96,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "سن: {age}\n"
             "آیا شخصیت تا انتهای آخرین کتاب، زنده است؟ {isAlive}\n".format(
                 name = query.data,
-                title={entry.title} if entry.title != 'none' else 'ندارد',
+                title=entry.title if entry.title != 'none' else 'ندارد',
                 male = "مرد" if entry.male == 1 else 'زن',
                 culture = entry.culture if entry.culture != 'none' else 'نامشخص',
                 dateOfBirth = entry.dateOfBirth if entry.dateOfBirth != 'none' else 'نامشخص',
