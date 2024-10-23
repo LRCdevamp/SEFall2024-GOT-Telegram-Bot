@@ -68,12 +68,3 @@ Please visit our [Wiki](https://github.com/LRCdevamp/SEFall2024-GOT-Telegram-Bot
 
 - Python 3.x
 - Telegram account
-- Internet connection
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
