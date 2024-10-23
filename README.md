@@ -4,7 +4,7 @@ A Telegram bot that provides detailed information about Game of Thrones battles,
 
 ![Python](https://img.shields.io/badge/Python-3.x-blue.svg)
 ![Platform](https://img.shields.io/badge/Platform-Telegram-blue.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
+
 
 ## Features
 
